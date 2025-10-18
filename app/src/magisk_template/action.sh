@@ -40,10 +40,10 @@ toggle_custom_click() {
     local flag_file="${MODDIR}/double_click"
     if [ -f "$flag_file" ]; then
         rm -f "$flag_file" 2>/dev/null
-        echo "[自定义按键] 当前模式: 单击监听"
+        echo "[自定义按键] 当前模式: 禁用双击监听"
     else
         touch "$flag_file" 2>/dev/null
-        echo "[自定义按键] 当前模式: 双击监听"
+        echo "[自定义按键] 当前模式: 启用双击监听"
     fi
 }
 
@@ -72,7 +72,7 @@ show_prompt() {
         echo "⚠️ 请先到系统设置中将侧键设为 [无操作]"
         echo " "
         echo "当前模式: $click_mode"
-        echo "按音量+切换单/双击 / 按音量-退出"
+        echo "按音量+切换双击启用状态(启用双击会导致单击400ms延时) / 按音量-退出"
     fi
 }
 

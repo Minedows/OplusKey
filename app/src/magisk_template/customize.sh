@@ -31,14 +31,14 @@ else
     echo "⚠️ 请先到系统设置中将侧键设为 [无操作]"
     echo " "
     echo "请选择要监听的事件："
-    echo "  音量 [+] → 单击"
-    echo "  音量 [-] → 双击"
+    echo "  音量 [+] → 禁用双击"
+    echo "  音量 [-] → 启用双击"
     case $(GET_KEY_CLICK) in
-        0) echo "✅ 已选择监听 [单击]"
+        0) echo "✅ 已选择 [禁用双击]"
            echo "👉 如需切换双击，请在模块目录创建 double_click 文件";;
         1) touch "$MODPATH/double_click"
-           echo "✅ 已选择监听 [双击]"
-           echo "👉 如需切换单击，请删除模块目录中的 double_click 文件";;
+           echo "✅ 已选择[启用双击]"
+           echo "👉 如需禁用双击，请删除模块目录中的 double_click 文件";;
     esac
 fi
 echo "-------------------------------------------"
@@ -58,6 +58,6 @@ echo "✅ 安装完成！您可以在 cust.sh / t-stage.sh 中定制功能"
 echo "👉 更多玩法欢迎自行扩展"
 echo ""
 echo "感谢使用本模块！"
-echo "作者：ItosEO & YangFengTuoZi"
+echo "作者：ItosEO & YangFengTuoZi & Minedows"
 echo "-------------------------------------------"
 set_perm_recursive $MODPATH 0 0 0755 0755

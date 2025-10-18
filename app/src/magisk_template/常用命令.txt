@@ -31,16 +31,17 @@ am start --user 0 -n com.coloros.soundrecorder/.TransparentActivity >/dev/null 2
 # 关录音
 am force-stop com.coloros.soundrecorder
 
-# 开录屏
-screenrecord /sdcard/demo.mp4 >/dev/null 2>&1 &
-参数：
---size WxH	设置录制分辨率
---bit-rate X	设置比特率 Mbps，默认 4 Mbps
---time-limit	最大录制时长（秒），默认/上限一般为 180 秒
---bugreport	添加时间戳等调试信息
+# 开关录屏
+dumpsys activity services | grep -q "com.oplus.screenrecorder/.RecorderService" && am start-service -n com.oplus.screenrecorder/com.oplus.screenrecorder.floatwindow.services.CommandRecorderService --ez recorder_game true --ei recorder_command 3 || am start -n com.oplus.screenrecorder/.MainActivity
 
-# 关录屏
-pkill -l screenrecord
+# 截屏
+service call color_screenshot 1
+
+# 小布识屏 (不要在桌面或锁屏打开，会出Bug)
+am start-foreground-service -a com.coloros.directui.SidebarScenesFunction -n com.coloros.directui/.DirectUIServices --es extra_entrance_function "full_screen_ocr"
+
+# 小布记忆
+am start-foreground-service -p "com.coloros.colordirectservice"; -a "coloros.colordirectservice.intent.action.COLLECT_DATA" --ei "triggerType" 2
 
 # 打开相机
 am start -n com.oplus.camera/com.oplus.camera.Camera
