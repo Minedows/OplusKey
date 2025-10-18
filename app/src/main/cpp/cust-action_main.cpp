@@ -99,7 +99,6 @@ int fd = -1;
  * 此函数包含一个无限循环，用于持续从内核读取输入事件，
  * 并根据事件类型（按下、保持、抬起）来调用相应的处理逻辑。
  */
-// ==================== 最终版 custActionMain 函数 ====================
 
 void custActionMain(const std::string &mod_dir) {
     const char *device = "/dev/input/event0";
