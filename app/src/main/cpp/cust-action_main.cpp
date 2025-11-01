@@ -179,12 +179,22 @@ void timer_thread_func(const std::string& script_path) {
  * @param mod_dir 模块所在的目录路径。
  * @return 返回读取到的最大点击次数，如果文件不存在或内容无效，返回0。
  */
+<<<<<<< HEAD
 int getMaxClicks(const std::string& mod_dir) {
     std::ifstream file(mod_dir + "/max_clicks"); // 构造文件路径并尝试打开
     if (file.is_open()) {
         int max_c = 0;
         file >> max_c; // 从文件中读取一个整数
         if (max_c > 0) return max_c;
+=======
+
+void custActionMain(const std::string &mod_dir) {
+    const char *device = "/dev/input/event0";
+    fd = open(device, O_RDONLY);
+    if (fd < 0) {
+        perror("Unable to open device");
+        exit(1);
+>>>>>>> 0895b8d44ea0e3fdae837afec5882e732810c6c2
     }
     return 0; // 默认返回0，表示不限制
 }
