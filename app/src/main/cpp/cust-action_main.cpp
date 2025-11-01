@@ -34,14 +34,17 @@ std::atomic<long> lastClickTime(0);
  * 当主循环判断出一次短按后，会调用此函数。
  * 此函数的核心是处理带有延迟确认的单击，以支持双击。
  */
-void onClick(long usedTime, long currentTime, const std::string &mod_dir) {
+void onClick(long usedTime, long currentTime, const std::string &mod_dir)
+{
     // 检查模块目录下是否存在名为 "double_click" 的文件
     // 让用户自行选择是否开启双击模式
-    if (std::filesystem::exists(mod_dir + "/double_click")) {
+    if (std::filesystem::exists(mod_dir + "/double_click"))
+    {
         // --- 双击模式已开启 ---
 
         // 判断当前点击与上一次点击的时间间隔是否小于400毫秒。
-        if (currentTime - lastClickTime < 400) {
+        if (currentTime - lastClickTime < 400)
+        {
             // --- 判定为双击 ---
             LOG_INFO("Double Click detected");
 
@@ -52,42 +55,48 @@ void onClick(long usedTime, long currentTime, const std::string &mod_dir) {
 
             // 调用外部脚本，并传递 "double" 参数。
             execBackground(DEFAULT_SHELL, {mod_dir + "/cust.sh", "double"});
-        } else {
+        }
+        else
+        {
             // --- 判定为第一次单击（可能是独立的单击，也可能是双击的第一下） ---
 
             // 更新 lastClickTime 为当前时间，为可能的下一次点击做准备。
             lastClickTime = currentTime;
 
             // 启动一个分离的后台线程，作为“延迟确认”单击的计时器。
-            std::thread([=]() {
-                // 在线程内捕获当前点击的时间戳，用于后续的验证。
-                long clickTimeToVerify = currentTime;
+            std::thread([=]()
+                        {
+                            // 在线程内捕获当前点击的时间戳，用于后续的验证。
+                            long clickTimeToVerify = currentTime;
 
-                // 让线程休眠400毫秒，即等待双击的最大时间窗口。
-                std::this_thread::sleep_for(std::chrono::milliseconds(400));
+                            // 让线程休眠400毫秒，即等待双击的最大时间窗口。
+                            std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
-                // 400毫秒后，线程醒来，检查全局的 lastClickTime 是否仍等于当初记录的时间。
-                // 如果相等，说明没有发生第二次点击来重置它，因此这是一次真正的单击。
-                if (lastClickTime == clickTimeToVerify) {
-                    LOG_INFO("Single Click detected (confirmed after timeout)");
+                            // 400毫秒后，线程醒来，检查全局的 lastClickTime 是否仍等于当初记录的时间。
+                            // 如果相等，说明没有发生第二次点击来重置它，因此这是一次真正的单击。
+                            if (lastClickTime == clickTimeToVerify)
+                            {
+                                LOG_INFO("Single Click detected (confirmed after timeout)");
 
-                    // 调用外部脚本，并传递 "single" 参数。
-                    execBackground(DEFAULT_SHELL, {mod_dir + "/cust.sh", "single"});
+                                // 调用外部脚本，并传递 "single" 参数。
+                                execBackground(DEFAULT_SHELL, {mod_dir + "/cust.sh", "single"});
 
-                    // （可选但推荐）确认单击后也重置，保持状态干净。
-                    lastClickTime = 0;
-                }
-                // 如果不相等（通常是被双击逻辑重置为0了），则线程什么也不做，安静退出。
-            }).detach(); // detach() 使线程与主线程分离，自行在后台运行和销毁。
+                                // （可选但推荐）确认单击后也重置，保持状态干净。
+                                lastClickTime = 0;
+                            }
+                            // 如果不相等（通常是被双击逻辑重置为0了），则线程什么也不做，安静退出。
+                        })
+                .detach(); // detach() 使线程与主线程分离，自行在后台运行和销毁。
         }
-    } else {
+    }
+    else
+    {
         // --- 双击模式未开启，任何短按都视为单击 ---
         LOG_INFO("Single Click detected");
         // 直接调用外部脚本，并传递 "single" 参数。
         execBackground(DEFAULT_SHELL, {mod_dir + "/cust.sh", "single"});
     }
 }
-
 
 // 全局变量，保存输入设备的文件描述符，以便在退出时能够关闭它。
 int fd = -1;
@@ -99,12 +108,13 @@ int fd = -1;
  * 此函数包含一个无限循环，用于持续从内核读取输入事件，
  * 并根据事件类型（按下、保持、抬起）来调用相应的处理逻辑。
  */
-// ==================== 最终版 custActionMain 函数 ====================
 
-void custActionMain(const std::string &mod_dir) {
+void custActionMain(const std::string &mod_dir)
+{
     const char *device = "/dev/input/event0";
     fd = open(device, O_RDONLY);
-    if (fd < 0) {
+    if (fd < 0)
+    {
         perror("Unable to open device");
         exit(1);
     }
@@ -114,12 +124,16 @@ void custActionMain(const std::string &mod_dir) {
     std::atomic<bool> longPressTriggered(false);
     std::atomic<bool> isButtonPressed(false);
 
-    while (true) {
+    while (true)
+    {
         ssize_t n = read(fd, &ev, sizeof(ev));
-        if (n == (ssize_t) sizeof(ev)) {
-            if (ev.code == 0x02df && ev.type == 1) { // 过滤事件
+        if (n == (ssize_t)sizeof(ev))
+        {
+            if (ev.code == 0x02df && ev.type == 1)
+            { // 过滤事件
 
-                if (ev.value == 1) { // 按下
+                if (ev.value == 1)
+                { // 按下
                     pressTime = ev.time.tv_sec * 1000 + ev.time.tv_usec / 1000;
                     longPressTriggered = false;
                     isButtonPressed = true; // 标记按键已按下
@@ -130,28 +144,34 @@ void custActionMain(const std::string &mod_dir) {
                         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
                         // 500毫秒后，检查按键是否仍然处于按下状态
-                        if (isButtonPressed) {
+                        if (isButtonPressed)
+                        {
                             LOG_INFO("Long Press triggered (while holding)");
                             // 标记长按已触发，以防止后续的抬起事件触发单击
                             longPressTriggered = true;
                             // 执行长按脚本
                             execBackground(DEFAULT_SHELL, {mod_dir + "/cust.sh", "long"});
                         }
-                    }).detach();
-
-                } else if (ev.value == 0) { // 抬起
+                    })
+                        .detach();
+                }
+                else if (ev.value == 0)
+                { // 抬起
                     // 标记按键已抬起
                     isButtonPressed = false;
 
                     // 检查长按是否“没有”被后台线程触发
-                    if (!longPressTriggered) {
+                    if (!longPressTriggered)
+                    {
                         long currentTime = ev.time.tv_sec * 1000 + ev.time.tv_usec / 1000;
                         // 如果没有，那么这就是一次短按，交由 onClick 处理
                         onClick(currentTime - pressTime, currentTime, mod_dir);
                     }
                 }
             }
-        } else {
+        }
+        else
+        {
             perror("Read error");
             break;
         }
@@ -162,9 +182,11 @@ void custActionMain(const std::string &mod_dir) {
 /**
  * @brief 模块退出时调用的清理函数。
  */
-void custActionExit() {
+void custActionExit()
+{
     // 确保文件描述符有效时才关闭，防止重复关闭或关闭无效句柄。
-    if (fd >= 0) {
+    if (fd >= 0)
+    {
         close(fd);
         fd = -1; // 重置为无效值
     }
