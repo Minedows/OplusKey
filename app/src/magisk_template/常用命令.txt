@@ -2,6 +2,9 @@
 如果您是新版自定义按键，请编辑模块目录的 cust.sh 脚本，并按照提示自定义操作
 
 -------------------------------------------------------------------------------------------------
+# 弹出一个toast
+# 这里调用了cmd2gui，请前往酷安下载，@无敌战神领主
+am startservice -n com.cmd2gui/.svc -a Toast -e content "未定义手势：$ACTION_CODE"
 
 # 微信付款码
 am start -n com.tencent.mm/.plugin.offline.ui.WalletOfflineCoinPurseUI

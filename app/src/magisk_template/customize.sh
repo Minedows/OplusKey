@@ -26,20 +26,52 @@ if [ -f "/proc/tristatekey/tri_state" ]; then
     echo "⚠️ 已屏蔽系统原有功能（卸载自动恢复，也可在 action 功能调整）"
 else
     echo "✅ 检测到 [自定义按键]"
-    echo "👉 模块支持监听 [单击 / 双击 / 长按]"
+    echo "👉 模块支持监听 [单击 / 双击 / 长按 / 三击] 等复杂手势"
     echo "👉 请在模块目录中的 cust.sh 中自定义操作"
     echo "⚠️ 请先到系统设置中将侧键设为 [无操作]"
     echo " "
-    echo "请选择要监听的事件："
-    echo "  音量 [+] → 禁用双击"
-    echo "  音量 [-] → 启用双击"
-    case $(GET_KEY_CLICK) in
-        0) echo "✅ 已选择 [禁用双击]"
-           echo "👉 如需切换双击，请在模块目录创建 double_click 文件";;
-        1) touch "$MODPATH/double_click"
-           echo "✅ 已选择[启用双击]"
-           echo "👉 如需禁用双击，请删除模块目录中的 double_click 文件";;
+    echo "  [音量+] → 切换到下一个模式"
+    echo "  [音量-] → 确认当前选择"
+    echo " "
+    echo " 0= 不限制连击次数 (所有短按均有400ms延迟)"
+    echo " 1= 仅单击+长按 (单击立即响应)"
+    echo " 2= 单击+双击+长按 (单击有400ms延迟)"
+    echo " "
+    echo " 👇🏻这里是序号"
+    FC=0
+    while true; do
+        echo "  $FC"
+        case $(GET_KEY_CLICK) in
+            0)
+            FC=$((FC + 1))
+            ;;
+            1)
+            break
+            ;;
+            2)
+            echo "未检测到音量键，请重试..."
+        esac
+        if [ $FC -gt 2 ]; then
+            FC=0
+        fi
+    done
+    echo " "
+    echo " 选择了: $FC"
+    echo " "
+    rm -f "$MODPATH/max_clicks"
+    echo "$FC" > "$MODPATH/max_clicks"
+    case "$FC" in
+        1)
+            echo " 当前模式：仅单击+长按 (单击立即响应)"
+        ;;
+        2)
+            echo " 当前模式：单击+双击+长按 (单击有400ms延迟)"
+        ;;
+        0)
+            echo " 当前模式：不限制连击次数 (所有短按均有400ms延迟)"
+        ;;
     esac
+    echo "✅ 后续可以运行action，或者更改模块目录的max_clicks来改变监听模式"
 fi
 echo "-------------------------------------------"
 echo " 我们为您准备了一些预设功能，可以复制到 cust.sh 或 t-stage.sh 使用："
