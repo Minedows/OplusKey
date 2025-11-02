@@ -4,7 +4,7 @@
 -------------------------------------------------------------------------------------------------
 # 弹出一个toast
 # 这里调用了cmd2gui，请前往酷安下载，@无敌战神领主
-am startservice -n com.cmd2gui/.svc -a Toast -e content "未定义手势：$ACTION_CODE"
+am startservice -n com.cmd2gui/.svc -a Toast -e content "这是一个toast"
 
 # 微信付款码
 am start -n com.tencent.mm/.plugin.offline.ui.WalletOfflineCoinPurseUI
@@ -23,6 +23,14 @@ echo 500 > /sys/class/leds/led:torch_0/brightness;echo 1 > /sys/class/leds/led:s
 
 # 关手电筒（只支持骁龙设备）
 echo torch0_trigger > /sys/class/leds/led:torch_0/trigger;echo 0 > /sys/class/leds/led:torch_0/brightness;echo switch0_trigger > /sys/class/leds/led:switch_0/trigger;echo torch0_trigger > /sys/class/leds/led:torch_0/trigger
+
+# 开手电筒（只支持天玑设备，在一加Ace5至尊版上通过测试，其他设备路径可能略有不同）
+echo 4 > /sys/class/leds/white:flash-1/brightness;echo 4 > /sys/class/leds/white:flash-3/brightness
+
+# 关手电筒（只支持天玑设备，在一加Ace5至尊版上通过测试，其他设备路径可能略有不同）
+echo 0 > /sys/class/leds/white:flash-1/brightness;echo 0 > /sys/class/leds/white:flash-3/brightness
+
+# 如果你想用一行命令实现开关手电筒，可以把上面的命令发给deepseek，让它生成一个自动判断的命令
 
 # 开关蓝牙
 svc bluetooth enable
@@ -44,10 +52,10 @@ service call color_screenshot 1
 am start-foreground-service -a com.coloros.directui.SidebarScenesFunction -n com.coloros.directui/.DirectUIServices --es extra_entrance_function "full_screen_ocr"
 
 # 小布记忆
-am start-foreground-service -p "com.coloros.colordirectservice"; -a "coloros.colordirectservice.intent.action.COLLECT_DATA" --ei "triggerType" 2
+am start-foreground-service -p "com.coloros.colordirectservice" -a "coloros.colordirectservice.intent.action.COLLECT_DATA" --ei "triggerType" 2
 
-# 打开相机
-am start -n com.oplus.camera/com.oplus.camera.Camera
+# 打开相机 (息屏可用，am start两次是因为第一次有概率弹不出来)
+if dumpsys power | grep "mWakefulness=" | grep -q "Dozing"; then sendevent /dev/input/event2 1 116 1; sendevent /dev/input/event2 0 0 0; sleep 0.1; sendevent /dev/input/event2 1 116 0; sendevent /dev/input/event2 0 0 0; sleep 0.2; fi; am start -n com.oplus.camera/.component.TinyCameraQuickStartActivity; sleep 0.2; am start -n com.oplus.camera/.component.TinyCameraQuickStartActivity
 
 # 开始录制视频
 am start -W -a android.media.action.VIDEO_CAMERA && sleep 1 && input keyevent KEYCODE_VOLUME_UP
